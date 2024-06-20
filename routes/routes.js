@@ -1,26 +1,27 @@
 import { DatabasePostgres } from "../database/database-postgres.js";
+import { validatePerson } from "../utils/validation.js";
 
 export async function personRoutes(fastify) {
   const database = new DatabasePostgres();
 
   // Rota para cadastrar um novo usuário
   fastify.post("/", async (request, reply) => {
-    const { name, road, number, neighborhood, city, state } = request.body;
+    const person = request.body;
 
+    const validationResult = validatePerson(person);
+
+    if (!validationResult.isValid) {
+      return reply.status(400).send({ message: validationResult.message });
+    }
     try {
-      await database.create({
-        name,
-        road,
-        number,
-        neighborhood,
-        city,
-        state,
-      });
+      await database.create(person);
       return reply
         .status(201)
         .send({ message: "Usuário cadastrado com sucesso!" });
-    } catch (error) {
-      return reply.send({ message: "Erro ao cadastrar o usuário!" });
+    } catch {
+      return reply
+        .status(500)
+        .send({ message: "Erro ao cadastrar o usuário!" });
     }
   });
 
@@ -35,27 +36,34 @@ export async function personRoutes(fastify) {
       }
       return reply.send(persons);
     } catch {
-      return reply.send({ message: "Erro ao listar os usuários cadastrados!" });
+      return reply
+        .status(500)
+        .send({ message: "Erro ao listar os usuários cadastrados!" });
     }
   });
 
-  // Rota para buscar um usuário pelo ID
+  // Rota para atualizar um usuário pelo ID
   fastify.put("/:id", async (request, reply) => {
     const personId = request.params.id;
-    const { name, road, number, neighborhood, city, state } = request.body;
+    const person = request.body;
+    const validationResult = validatePerson(person);
+
+    if (!validationResult.isValid) {
+      return reply.status(400).send({ message: validationResult.message });
+    }
 
     try {
-      await database.update(personId, {
-        name,
-        road,
-        number,
-        neighborhood,
-        city,
-        state,
-      });
+      const existingPerson = await database.get(personId);
+      if (!existingPerson) {
+        return reply.status(404).send({ message: "Usuário não encontrado!" });
+      }
+
+      await database.update(personId, person);
       return reply.send({ message: "Usuário atualizado com sucesso!" });
     } catch {
-      return reply.send({ message: "Erro ao atualizar o usuário!" });
+      return reply
+        .status(500)
+        .send({ message: "Erro ao atualizar o usuário!" });
     }
   });
 
@@ -64,10 +72,15 @@ export async function personRoutes(fastify) {
     const personId = request.params.id;
 
     try {
+      const person = await database.get(personId);
+      if (!person) {
+        return reply.status(404).send({ message: "Usuário não encontrado!" });
+      }
+
       await database.delete(personId);
       return reply.send({ message: "Usuário deletado com sucesso!" });
     } catch {
-      return reply.send({ message: "Erro ao deletar o usuário!" });
+      return reply.status(500).send({ message: "Erro ao deletar o usuário!" });
     }
   });
 }
