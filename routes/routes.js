@@ -30,6 +30,9 @@ export async function personRoutes(fastify) {
 
     try {
       const persons = await database.list(search);
+      if (persons.length === 0) {
+        return reply.send({ message: "Nenhum usuário cadastrado!" });
+      }
       return reply.send(persons);
     } catch {
       return reply.send({ message: "Erro ao listar os usuários cadastrados!" });
