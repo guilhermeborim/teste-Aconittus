@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { sql } from "./db.js";
+
 export class DatabasePostgres {
   async list(search) {
     let persons;
@@ -30,5 +31,10 @@ export class DatabasePostgres {
 
   async delete(id) {
     await sql`DELETE FROM person WHERE id = ${id}`;
+  }
+
+  async get(id) {
+    const persons = await sql`SELECT * FROM person WHERE id = ${id}`;
+    return persons[0];
   }
 }
