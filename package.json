@@ -1,0 +1,18 @@
+{
+  "name": "teste-tecnico",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch --no-warnings server.js"
+  },
+  "keywords": [],
+  "author": "borimdev@gmail.com",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "fastify": "^4.28.0",
+    "postgres": "^3.4.4"
+  }
+}
