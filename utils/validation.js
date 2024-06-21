@@ -1,26 +1,21 @@
-/**
- * Validate person data.
- * @param {Object} person
- * @param {string} person.name
- * @param {string} person.road
- * @param {number} person.number
- * @param {string} person.neighborhood
- * @param {string} person.city
- * @param {string} person.state
- * @returns {Object} { isValid: boolean, message: string }
- */
 export function validatePerson(person) {
-  if (!person.name) return { isValid: false, message: "Nome é obrigatório." };
-  if (!person.road) return { isValid: false, message: "Rua é obrigatória." };
-  if (typeof person.number === "string") {
-    return { isValid: false, message: "Apenas números." };
-  } else if (!person.number) {
-    return { isValid: false, message: "Número é obrigatório." };
+  const fields = [
+    { name: "name", message: "Nome é obrigatório." },
+    { name: "road", message: "Rua é obrigatória." },
+    { name: "number", message: "Número é obrigatório.", isNumber: true },
+    { name: "neighborhood", message: "Bairro é obrigatório." },
+    { name: "city", message: "Cidade é obrigatória." },
+    { name: "state", message: "Estado é obrigatório." },
+  ];
+
+  for (let field of fields) {
+    if (field.isNumber && typeof person[field.name] === "string") {
+      return { isValid: false, message: "Apenas números." };
+    }
+    if (!person[field.name]) {
+      return { isValid: false, message: field.message };
+    }
   }
-  if (!person.neighborhood)
-    return { isValid: false, message: "Bairro é obrigatório." };
-  if (!person.city) return { isValid: false, message: "Cidade é obrigatória." };
-  if (!person.state)
-    return { isValid: false, message: "Estado é obrigatório." };
+
   return { isValid: true, message: "" };
 }
